@@ -51,8 +51,7 @@ public class ParserApplication {
 			for (String arg : args.getSourceArgs()) {
 				parser.parse(arg);
 			}
-
-			parser.parse("/Users/vahur.varris/Downloads/semester-project/postgres/bview.20191101.1600.gz");
+			
 		}
 	}
 
