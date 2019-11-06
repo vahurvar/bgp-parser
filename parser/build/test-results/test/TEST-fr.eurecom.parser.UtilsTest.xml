@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="fr.eurecom.parser.UtilsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2019-11-06T15:48:38" hostname="catapults-mbp.home" time="0.031">
-  <properties/>
-  <testcase name="isIpv4_zeroes()" classname="fr.eurecom.parser.UtilsTest" time="0.023"/>
-  <testcase name="isIpv4()" classname="fr.eurecom.parser.UtilsTest" time="0.002"/>
-  <testcase name="isIpv6()" classname="fr.eurecom.parser.UtilsTest" time="0.002"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
