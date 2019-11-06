@@ -15,3 +15,16 @@ CREATE TABLE bgp(
 CREATE INDEX bgp_prefix ON bgp(from_ip);
 CREATE INDEX bgp_from_ip ON bgp(from_ip);
 CREATE INDEX bgp_from_asn ON bgp(from_asn);
+
+CREATE TABLE prefix_timestamp(
+    id SERIAL PRIMARY KEY,
+    prefix_cidr cidr,
+    prefix_date date,
+    unique (prefix_cidr, prefix_date)
+);
+
+CREATE INDEX prefix_timestamp_cidr ON prefix_timestamp(prefix_cidr);
+CREATE INDEX prefix_timestamp_date ON prefix_timestamp(prefix_date);
+CREATE INDEX prefix_timestamp_date_cidr ON prefix_timestamp(prefix_cidr, prefix_date);
+
+CREATE VIEW prefix_count AS SELECT prefix_cidr, count(1) from prefix_timestamp group by prefix_cidr;

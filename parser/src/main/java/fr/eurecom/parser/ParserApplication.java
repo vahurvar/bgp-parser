@@ -1,17 +1,20 @@
 package fr.eurecom.parser;
 
+import fr.eurecom.parser.parsers.PrefixParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 
 @SpringBootApplication
+@EnableJpaRepositories
 public class ParserApplication {
 
 	public static void main(String[] args) {
@@ -36,18 +39,20 @@ public class ParserApplication {
 	@Component
 	public class AppStartupRunner implements ApplicationRunner {
 
-		private final PrefixDao prefixDao;
+		private final BgpDao bgpDao;
 
-		public AppStartupRunner(PrefixDao prefixDao) {
-			this.prefixDao = prefixDao;
+		public AppStartupRunner(BgpDao bgpDao) {
+			this.bgpDao = bgpDao;
 		}
 
 		@Override
 		public void run(ApplicationArguments args) throws Exception {
-			FileParser parser = new FileParser(prefixDao);
+			PrefixParser parser = new PrefixParser(bgpDao);
 			for (String arg : args.getSourceArgs()) {
 				parser.parse(arg);
 			}
+
+			parser.parse("/Users/vahur.varris/Downloads/semester-project/postgres/bview.20191101.1600.gz");
 		}
 	}
 

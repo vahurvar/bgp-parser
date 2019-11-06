@@ -1,4 +1,6 @@
-package fr.eurecom.parser;
+package fr.eurecom.parser.parsers;
+
+import fr.eurecom.parser.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,11 +23,8 @@ public class LineProducer implements Runnable {
 
     @Override
     public void run() {
-        Runtime rt = Runtime.getRuntime();
-        String[] commands = {"bgpdump", "-m", "-t", "change" , file};
         try {
-            Process proc;
-            proc = rt.exec(commands);
+            Process proc = Runtime.getRuntime().exec(new String[]{"bgpdump", "-m", "-t", "change" , file});
             try (BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
                 String line;
                 while ((line = br.readLine()) != null) {

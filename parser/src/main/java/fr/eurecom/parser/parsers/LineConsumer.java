@@ -1,24 +1,23 @@
-package fr.eurecom.parser;
+package fr.eurecom.parser.parsers;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class LineConsumer implements Runnable {
 
     private final BlockingQueue<String[]> q;
     private final String[] poison;
-    private final PrefixDao dao;
     private final int batch_size;
-    private final String file;
+    private final Consumer<List<String[]>> consumerAction;
 
-    public LineConsumer(BlockingQueue<String[]> q, String[] poison, PrefixDao dao, int batch_size, String file) {
+    public LineConsumer(BlockingQueue<String[]> q, String[] poison, int batch_size, Consumer<List<String[]>> consumerAction) {
         this.q = q;
         this.poison = poison;
-        this.dao = dao;
         this.batch_size = batch_size;
-        this.file = file;
+        this.consumerAction = consumerAction;
     }
 
     @Override
@@ -42,11 +41,11 @@ public class LineConsumer implements Runnable {
                                 .filter(prefix -> prefix != poison)
                                 .collect(Collectors.toList());
 
-                        dao.insertAll(collect, file);
+                        consumerAction.accept(collect);
                         prefixes.clear();
                         break;
                     } else {
-                        dao.insertAll(prefixes, file);
+                        consumerAction.accept(prefixes);
                         prefixes.clear();
                     }
                 }
@@ -57,7 +56,7 @@ public class LineConsumer implements Runnable {
         }
 
         if (!prefixes.isEmpty()) {
-            dao.insertAll(prefixes, file);
+            consumerAction.accept(prefixes);
         }
 
         System.out.println("Consumer out");
