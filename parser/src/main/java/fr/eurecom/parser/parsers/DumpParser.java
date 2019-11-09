@@ -1,7 +1,5 @@
 package fr.eurecom.parser.parsers;
 
-import fr.eurecom.parser.BgpDao;
-
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -9,16 +7,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class FullDumpParser {
-
-    private final BgpDao bgpDao;
+public class DumpParser {
 
     private final int N_THREADS = 3;
     private final int BATCH = 20_000;
     private final String[] poison = {"poison"};
+    private final Consumer<List<String[]>> consumer;
 
-    public FullDumpParser(BgpDao bgpDao) {
-        this.bgpDao = bgpDao;
+    public DumpParser(Consumer<List<String[]>> consumer) {
+        this.consumer = consumer;
     }
 
     public void parse(String file) throws Exception {
@@ -31,10 +28,8 @@ public class FullDumpParser {
         ExecutorService executorService = Executors.newFixedThreadPool(N_THREADS);
         executorService.submit(new LineProducer(file, q, stream));
 
-        Consumer<List<String[]>> consumerAction = list -> bgpDao.insertAllToBgp(list, file);
-
         List<Future> consumers = IntStream.range(0, N_THREADS)
-                .mapToObj(i -> executorService.submit(new LineConsumer(q, poison, BATCH, consumerAction)))
+                .mapToObj(i -> executorService.submit(new LineConsumer(q, poison, BATCH, consumer)))
                 .collect(Collectors.toList());
 
         for (Future f : consumers) {

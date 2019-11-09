@@ -18,13 +18,16 @@ CREATE INDEX bgp_from_asn ON bgp(from_asn);
 
 CREATE TABLE prefix_timestamp(
     id BIGSERIAL PRIMARY KEY,
-    prefix_cidr cidr,
-    prefix_date date,
+    prefix_cidr cidr NOT NULL,
+    prefix_date date NOT NULL,
+    asn VARCHAR(10) NOT NULL,
+    as_path VARCHAR(100)[] NOT NULL,
     unique (prefix_cidr, prefix_date)
 );
 
 CREATE INDEX prefix_timestamp_cidr ON prefix_timestamp(prefix_cidr);
 CREATE INDEX prefix_timestamp_date ON prefix_timestamp(prefix_date);
+CREATE INDEX prefix_timestamp_asn ON prefix_timestamp(asn);
 CREATE INDEX prefix_timestamp_date_cidr ON prefix_timestamp(prefix_cidr, prefix_date);
 
 CREATE VIEW prefix_count AS SELECT prefix_cidr, count(1) from prefix_timestamp group by prefix_cidr;

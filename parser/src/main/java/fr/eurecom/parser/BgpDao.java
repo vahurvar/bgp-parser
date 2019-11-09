@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -22,6 +23,9 @@ public class BgpDao {
 
     private static final String SQL = "INSERT INTO bgp(dump_timestamp, from_ip, from_asn, prefix, origin, next_hop, as_path, file_name) \n" +
             "        VALUES(?, ?::inet, ?, ?::cidr, ?::origin_type, ?::inet, ?::varchar(10)[], ?)";
+
+    private final String insertTimestampSql = "INSERT INTO prefix_timestamp(prefix_cidr, prefix_date, asn, as_path) " +
+            "VALUES(?::cidr, ?, ?, ?::varchar(100)[]) ON CONFLICT (prefix_cidr, prefix_date) DO NOTHING";
 
     public int[] insertAllToBgp(List<String[]> prefixes, String file) {
         BatchPreparedStatementSetter batchPreparedStatementSetter = new BatchPreparedStatementSetter() {
@@ -49,15 +53,27 @@ public class BgpDao {
     }
 
     public int[] insert(List<String[]> prefixes) {
-        final String insertTimestampSql = "INSERT INTO prefix_timestamp(prefix_cidr, prefix_date) VALUES(?::cidr, ?) ON CONFLICT (prefix_cidr, prefix_date) DO NOTHING";
-
         BatchPreparedStatementSetter batchPreparedStatementSetter = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 String[] split = prefixes.get(i);
+                String[] asPath = split[6].split(" ");
+                String asn = asPath[asPath.length - 1];
+
+                if (asn.startsWith("{")) {
+                    String[] last = asn.replaceFirst("\\{", "")
+                            .replaceFirst("}", "")
+                            .split(",");
+
+                    asPath[asPath.length - 1] = Arrays.toString(last);
+                    asn = asPath[asPath.length - 2];
+                }
+
                 ps.setString(1, split[5]);
                 Instant instant = Instant.ofEpochSecond(Integer.parseInt(split[1]));
                 ps.setObject(2, instant.atZone(ZoneId.of("UTC")).toLocalDate());
+                ps.setString(3, asn);
+                ps.setObject(4, asPath);
             }
 
             @Override

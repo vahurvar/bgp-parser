@@ -1,6 +1,6 @@
 package fr.eurecom.parser;
 
-import fr.eurecom.parser.parsers.PrefixParser;
+import fr.eurecom.parser.parsers.DumpParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -11,6 +11,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.util.List;
+import java.util.function.Consumer;
 
 @SpringBootApplication
 public class ParserApplication {
@@ -45,12 +47,18 @@ public class ParserApplication {
 
 		@Override
 		public void run(ApplicationArguments args) throws Exception {
-			PrefixParser parser = new PrefixParser(bgpDao);
+			DumpParser parser = new DumpParser(bgpDao::insert);
+
 			for (String arg : args.getSourceArgs()) {
 				parser.parse(arg);
 			}
 
+			parser.parse("/Users/vahur/Downloads/bview.20191002.0000.gz");
 		}
+	}
+
+	private Consumer<List<String[]>> constructBgpConsumer(String file, BgpDao bgpDao) {
+		return list -> bgpDao.insertAllToBgp(list, file);
 	}
 
 }
