@@ -1,7 +1,7 @@
 CREATE TYPE origin_type AS ENUM ('EGP', 'IGP', 'INCOMPLETE');
 
 CREATE TABLE bgp(
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     dump_timestamp TIMESTAMP NOT NULL,
     prefix cidr NOT NULL,
     from_ip inet NOT NULL,
@@ -17,7 +17,7 @@ CREATE INDEX bgp_from_ip ON bgp(from_ip);
 CREATE INDEX bgp_from_asn ON bgp(from_asn);
 
 CREATE TABLE prefix_timestamp(
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     prefix_cidr cidr,
     prefix_date date,
     unique (prefix_cidr, prefix_date)
