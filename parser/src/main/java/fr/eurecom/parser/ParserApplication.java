@@ -52,8 +52,6 @@ public class ParserApplication {
 			for (String arg : args.getSourceArgs()) {
 				parser.parse(arg);
 			}
-
-			parser.parse("/Users/vahur/Downloads/bview.20191002.0000.gz");
 		}
 	}
 
