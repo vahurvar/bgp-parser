@@ -11,8 +11,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.util.List;
-import java.util.function.Consumer;
 
 @SpringBootApplication
 public class ParserApplication {
@@ -53,10 +51,6 @@ public class ParserApplication {
 				parser.parse(arg);
 			}
 		}
-	}
-
-	private Consumer<List<String[]>> constructBgpConsumer(String file, BgpDao bgpDao) {
-		return list -> bgpDao.insertAllToBgp(list, file);
 	}
 
 }

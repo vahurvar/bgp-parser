@@ -8,7 +8,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,68 +20,57 @@ public class BgpDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private static final String SQL = "INSERT INTO bgp(dump_timestamp, from_ip, from_asn, prefix, origin, next_hop, as_path, file_name) \n" +
-            "        VALUES(?, ?::inet, ?, ?::cidr, ?::origin_type, ?::inet, ?::varchar(10)[], ?)";
-
-    private final String insertTimestampSql = "INSERT INTO prefix_timestamp(prefix_cidr, prefix_date, asn, as_path) " +
-            "VALUES(?::cidr, ?, ?, ?::varchar(100)[]) ON CONFLICT (prefix_cidr, prefix_date) DO NOTHING";
-
-    public int[] insertAllToBgp(List<String[]> prefixes, String file) {
-        BatchPreparedStatementSetter batchPreparedStatementSetter = new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                String[] split = prefixes.get(i);
-                Instant epochSeconds = Instant.ofEpochSecond(Integer.parseInt(split[1]));
-                ps.setTimestamp(1, Timestamp.from(epochSeconds));
-                ps.setString(2, split[3]);
-                ps.setString(3, split[4]);
-                ps.setString(4, split[5]);
-                ps.setString(5, split[7]);
-                ps.setString(6, split[8]);
-                ps.setObject(7, split[6].split(" "));
-                ps.setString(8, file);
-            }
-
-            @Override
-            public int getBatchSize() {
-                return prefixes.size();
-            }
-        };
-
-        return jdbcTemplate.batchUpdate(SQL, batchPreparedStatementSetter);
-    }
+    private final String insertTimestampSql = "INSERT INTO prefix_temp(prefix_cidr, prefix_timestamp, as_path) " +
+            "VALUES(?::cidr, ?, ?) ON CONFLICT DO NOTHING";
 
     public int[] insert(List<String[]> prefixes) {
-        BatchPreparedStatementSetter batchPreparedStatementSetter = new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                String[] split = prefixes.get(i);
-                String[] asPath = split[6].split(" ");
-                String asn = asPath[asPath.length - 1];
+        BatchPreparedStatementSetter batchPreparedStatementSetter = getBatchPreparedStatement(prefixes);
+        return jdbcTemplate.batchUpdate(insertTimestampSql, batchPreparedStatementSetter);
+    }
 
-                if (asn.startsWith("{")) {
-                    String[] last = asn.replaceFirst("\\{", "")
-                            .replaceFirst("}", "")
-                            .split(",");
+    private BatchPreparedStatementSetter getBatchPreparedStatement(List<String[]> prefixes) {
+        return new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    String[] split = prefixes.get(i);
 
-                    asPath[asPath.length - 1] = Arrays.toString(last);
-                    asn = asPath[asPath.length - 2];
+                    ps.setString(1, split[5]);
+                    Instant instant = Instant.ofEpochSecond(Integer.parseInt(split[1]));
+                    ps.setTimestamp(2, Timestamp.from(instant));
+                    ps.setObject(3, split[6]);
                 }
 
-                ps.setString(1, split[5]);
-                Instant instant = Instant.ofEpochSecond(Integer.parseInt(split[1]));
-                ps.setObject(2, instant.atZone(ZoneId.of("UTC")).toLocalDate());
-                ps.setString(3, asn);
-                ps.setObject(4, asPath);
-            }
+                @Override
+                public int getBatchSize() {
+                    return prefixes.size();
+                }
+            };
+    }
 
-            @Override
-            public int getBatchSize() {
-                return prefixes.size();
-            }
-        };
+    private String[] convertASNPath(String s) {
+        String[] asPath = s.split(" ");
+        String asn = getAsnNumber(asPath, asPath[asPath.length - 1]);
 
-        return jdbcTemplate.batchUpdate(insertTimestampSql, batchPreparedStatementSetter);
+        if (asn.startsWith("{")) {
+            String[] last = asn.replaceFirst("\\{", "")
+                    .replaceFirst("}", "")
+                    .split(",");
+
+            asPath[asPath.length - 1] = Arrays.toString(last);
+        }
+        return asPath;
+    }
+
+    private String getAsnNumber(String[] asPath, String asn) {
+        if (asn.startsWith("{")) {
+            String[] last = asn.replaceFirst("\\{", "")
+                    .replaceFirst("}", "")
+                    .split(",");
+
+            asPath[asPath.length - 1] = Arrays.toString(last);
+            asn = asPath[asPath.length - 2];
+        }
+        return asn;
     }
 
 }
