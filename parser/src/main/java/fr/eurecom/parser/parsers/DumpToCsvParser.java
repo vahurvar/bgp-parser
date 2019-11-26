@@ -31,7 +31,7 @@ public class DumpToCsvParser {
     }
 
     private String getLine(String[] lines) {
-        String delimiter = ";";
+        String delimiter = ",";
         char quote = '\"';
         return lines[1] +
                 delimiter +
