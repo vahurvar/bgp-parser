@@ -1,16 +1,11 @@
 package fr.eurecom.parser;
 
-import fr.eurecom.parser.parsers.DumpParser;
-import org.springframework.beans.factory.annotation.Value;
+import fr.eurecom.parser.parsers.DumpToCsvParser;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
-
-import javax.sql.DataSource;
 
 @SpringBootApplication
 public class ParserApplication {
@@ -19,7 +14,8 @@ public class ParserApplication {
 		SpringApplication.run(ParserApplication.class, args);
 	}
 
-	@Bean
+	/*
+		@Bean
 	public DataSource dataSource(
 			@Value("${database.user}") String user,
 			@Value("${database.password}") String password,
@@ -33,22 +29,18 @@ public class ParserApplication {
 		dataSource.setPassword(password);
 		return dataSource;
 	}
+	 */
 
 	@Component
 	public class AppStartupRunner implements ApplicationRunner {
 
-		private final BgpDao bgpDao;
-
-		public AppStartupRunner(BgpDao bgpDao) {
-			this.bgpDao = bgpDao;
-		}
-
 		@Override
 		public void run(ApplicationArguments args) throws Exception {
-			DumpParser parser = new DumpParser(bgpDao::insert);
+			DumpToCsvParser parser = new DumpToCsvParser();
 
 			for (String arg : args.getSourceArgs()) {
 				parser.parse(arg);
+				Runtime.getRuntime().exec("rm " + arg);
 			}
 		}
 	}

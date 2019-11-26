@@ -24,5 +24,8 @@ if __name__ == "__main__":
     for i, arg in enumerate(sys.argv):
         if i != 0:
             print('Parsing', arg)
-            parse(arg)
+            text_file = arg + '.out'
+            os.system('bgpdump -m -t change -O ' + text_file + ' ' + arg)
             os.system('rm ' + arg)
+            parse(text_file)
+            os.system('rm ' + text_file)
