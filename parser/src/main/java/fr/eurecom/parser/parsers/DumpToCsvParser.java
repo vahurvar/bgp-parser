@@ -10,7 +10,7 @@ public class DumpToCsvParser {
         long start = System.currentTimeMillis();
         System.out.println("Parsing file: " + file);
 
-        Process proc = Runtime.getRuntime().exec(new String[]{"bgpdump", "-m", "-t", "change" , file});
+        Process proc = Runtime.getRuntime().exec(new String[]{"bgpdump", "-m" , file});
         BufferedWriter out = new BufferedWriter(new FileWriter(file + ".csv", true));
         try (BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
             String line;
