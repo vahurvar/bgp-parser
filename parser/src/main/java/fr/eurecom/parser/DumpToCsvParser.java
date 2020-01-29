@@ -1,8 +1,8 @@
-package fr.eurecom.parser.parsers;
-
-import fr.eurecom.parser.Utils;
+package fr.eurecom.parser;
 
 import java.io.*;
+
+import static fr.eurecom.parser.Utils.isIpV4Address;
 
 public class DumpToCsvParser {
 
@@ -16,7 +16,7 @@ public class DumpToCsvParser {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] split = line.split("\\|");
-                if (Utils.isIpV4Address(split[8])) { // If next hop is IPV4
+                if (isIpV4Address(split[8])) { // If next hop is IPV4
                     out.write(getLine(split));
                     out.newLine();
                 }
