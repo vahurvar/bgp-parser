@@ -6,6 +6,9 @@ import static fr.eurecom.parser.Utils.isIpV4Address;
 
 public class DumpToCsvParser {
 
+    private static final String DELIMITER = ",";
+    private static final char QUOTE = '\"';
+
     public void parse(String file) throws Exception {
         long start = System.currentTimeMillis();
         System.out.println("Parsing file: " + file);
@@ -31,13 +34,11 @@ public class DumpToCsvParser {
     }
 
     private String getLine(String[] lines) {
-        String delimiter = ",";
-        char quote = '\"';
         return lines[1] +
-                delimiter +
-                quote + lines[5] + quote +
-                delimiter +
-                quote + lines[6] + quote;
+                DELIMITER +
+                QUOTE + lines[5] + QUOTE +
+                DELIMITER +
+                QUOTE + lines[6] + QUOTE;
     }
 
 }
