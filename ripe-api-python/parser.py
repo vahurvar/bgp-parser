@@ -22,7 +22,6 @@ def get_as_country(asn):
             if per > percentage:
                 percentage = per
                 country = c
-
         return country
     else:
         return '?'
