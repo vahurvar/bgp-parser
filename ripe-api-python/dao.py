@@ -2,7 +2,6 @@ import psycopg2
 from config import config
 
 class Dao:
-
     def __init__(self, *args, **kwargs):
         self.params = config()
 
