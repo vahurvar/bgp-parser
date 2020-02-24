@@ -59,7 +59,7 @@ create table path
 	id serial not null
 		constraint test_t_pkey
 			primary key,
-	paths text[],
+	paths bigint[],
 	announced_by bigint,
 	last_hop bigint
 );
