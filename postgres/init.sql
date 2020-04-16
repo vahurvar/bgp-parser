@@ -6,7 +6,7 @@ create table prefix_temp (
 
 create table prefix_data (
 	prefix_cidr cidr,
-	prefix_timestamp integer[],
+	prefix_timestamp integer,
 	as_path text
 );
 
